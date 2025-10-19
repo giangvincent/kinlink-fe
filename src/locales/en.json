@@ -1,0 +1,41 @@
+{
+  "app": {
+    "title": "KinLink",
+    "tagline": "Build your family legacy",
+    "cta": "Build your family tree",
+    "login": "Sign In",
+    "register": "Create Account"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "familyTree": "Family Tree",
+    "members": "Members",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "remember": "Remember me",
+    "confirmPassword": "Confirm password",
+    "haveAccount": "Already have an account?",
+    "needAccount": "Need an account?"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {name}",
+    "members": "Total members",
+    "events": "Upcoming events",
+    "quickActions": "Quick actions"
+  },
+  "settings": {
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "language": "Language",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light"
+  }
+}
