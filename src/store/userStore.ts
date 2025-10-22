@@ -4,6 +4,7 @@ import { requestSanctumCsrf } from '@/api/axios'
 import { clearToken, getToken, setToken } from '@/utils/auth'
 import { login as apiLogin, register as apiRegister, me as apiMe } from '@/api/auth'
 import { switchFamily } from '@/api/family'
+import { createFamily } from '@/api/family'
 
 interface UserProfile {
   id: string
@@ -70,6 +71,15 @@ export const useUserStore = defineStore('user', () => {
         const familyId = memberships.value?.[0]?.family_id ?? null
         if (familyId) {
           await switchFamily(familyId)
+        } else {
+          // If the user has no memberships yet, create a default family for them so
+          // the app has a family context and APIs that expect X-Family-ID won't 401.
+          const defaultName = `${user.value?.name ?? 'My'} Family`
+          const created = await createFamily({ name: defaultName })
+          // createFamily will set the active family id when successful
+          if (created?.data?.id) {
+            await switchFamily(created.data.id)
+          }
         }
       }
 
@@ -94,6 +104,12 @@ export const useUserStore = defineStore('user', () => {
         const familyId = memberships.value?.[0]?.family_id ?? null
         if (familyId) {
           await switchFamily(familyId)
+        } else {
+          const defaultName = `${user.value?.name ?? 'My'} Family`
+          const created = await createFamily({ name: defaultName })
+          if (created?.data?.id) {
+            await switchFamily(created.data.id)
+          }
         }
       }
 

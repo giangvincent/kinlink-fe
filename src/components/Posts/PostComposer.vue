@@ -29,6 +29,7 @@
 import { ref } from 'vue'
 import BaseButton from '@/components/Base/BaseButton.vue'
 import { createPost } from '@/api/posts'
+import { getActiveFamilyId } from '@/api/axios'
 
 const emit = defineEmits<{ (e: 'posted'): void }>()
 
@@ -47,6 +48,12 @@ const clear = () => {
 
 const submit = async () => {
   if (!body.value.trim()) return
+  // Ensure we have a family context before creating a post
+  const familyId = getActiveFamilyId()
+  if (!familyId) {
+    error.value = 'No family selected — create or join a family first.'
+    return
+  }
   submitting.value = true
   error.value = null
   try {
