@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import api from '@/api/axios'
+import { requestSanctumCsrf } from '@/api/axios'
 import { clearToken, getToken, setToken } from '@/utils/auth'
+import { login as apiLogin, register as apiRegister, me as apiMe } from '@/api/auth'
+import { switchFamily } from '@/api/family'
 
 interface UserProfile {
   id: string
@@ -19,21 +21,59 @@ interface RegisterPayload extends Credentials {
   name: string
 }
 
+interface AuthResponse {
+  token: string
+  user: UserProfile
+}
+
+interface Membership {
+  family_id: number
+  family_name: string
+  family_slug: string
+  role: string | null
+}
+
 export const useUserStore = defineStore('user', () => {
+  const storedToken = getToken()
   const user = ref<UserProfile | null>(null)
-  const token = ref<string | null>(getToken())
+  const token = ref<string | null>(storedToken ?? null)
+  const memberships = ref<Membership[] | null>(null)
   const loading = ref(false)
+
+  if (storedToken) {
+    setToken(storedToken)
+  }
+
+  const applySession = (session: AuthResponse) => {
+    token.value = session.token
+    setToken(session.token)
+    user.value = session.user
+    return session
+  }
 
   const isAuthenticated = computed(() => Boolean(token.value))
 
   async function login(payload: Credentials) {
     loading.value = true
     try {
-      const { data } = await api.post('/auth/login', payload)
-      token.value = data.token
-      setToken(data.token)
-      user.value = data.user
-      return data
+      // ensure CSRF cookie when using Sanctum session login
+      await requestSanctumCsrf()
+      const res = await apiLogin(payload)
+      const session = applySession(res.data)
+
+      // fetch full profile including memberships
+      const meRes = await apiMe()
+      if (meRes?.data) {
+        user.value = meRes.data.user
+        memberships.value = meRes.data.memberships ?? []
+
+        const familyId = memberships.value?.[0]?.family_id ?? null
+        if (familyId) {
+          await switchFamily(familyId)
+        }
+      }
+
+      return session
     } finally {
       loading.value = false
     }
@@ -42,11 +82,22 @@ export const useUserStore = defineStore('user', () => {
   async function register(payload: RegisterPayload) {
     loading.value = true
     try {
-      const { data } = await api.post('/auth/register', payload)
-      token.value = data.token
-      setToken(data.token)
-      user.value = data.user
-      return data
+      await requestSanctumCsrf()
+      const res = await apiRegister(payload)
+      const session = applySession(res.data)
+
+      const meRes = await apiMe()
+      if (meRes?.data) {
+        user.value = meRes.data.user
+        memberships.value = meRes.data.memberships ?? []
+
+        const familyId = memberships.value?.[0]?.family_id ?? null
+        if (familyId) {
+          await switchFamily(familyId)
+        }
+      }
+
+      return session
     } finally {
       loading.value = false
     }
@@ -54,9 +105,11 @@ export const useUserStore = defineStore('user', () => {
 
   async function fetchProfile() {
     if (!token.value) return null
-    const { data } = await api.get('/me')
-    user.value = data
-    return data
+    const meRes = await apiMe()
+    if (!meRes?.data) return null
+    user.value = meRes.data.user
+    memberships.value = meRes.data.memberships ?? []
+    return user.value
   }
 
   function logout() {
@@ -68,6 +121,7 @@ export const useUserStore = defineStore('user', () => {
   return {
     user,
     token,
+    memberships,
     loading,
     isAuthenticated,
     login,

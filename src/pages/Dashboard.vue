@@ -60,10 +60,10 @@
 
     <section class="card">
       <div class="mb-4 flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Family memories</h3>
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Family feed</h3>
         <BaseButton variant="ghost" @click="router.push({ name: 'Members' })">Manage albums</BaseButton>
       </div>
-      <PhotoGallery :items="galleryItems" />
+      <PostList />
     </section>
   </div>
 </template>
@@ -75,7 +75,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import BaseButton from '@/components/Base/BaseButton.vue'
-import PhotoGallery from '@/components/Media/PhotoGallery.vue'
+import PostList from '@/components/Posts/PostList.vue'
 import dayjs from '@/utils/date'
 import { useFamilyStore } from '@/store/familyStore'
 import { useUserStore } from '@/store/userStore'
@@ -113,36 +113,7 @@ const quickActions = [
 
 const formatDate = (date: string) => dayjs(date).format('DD MMM')
 
-const galleryItems = [
-  {
-    src: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=400&q=60',
-    width: 1200,
-    height: 900,
-    title: 'Tet celebration 1998'
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=400&q=60',
-    width: 1200,
-    height: 900,
-    title: 'Generational portrait'
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1499696010180-025ef6e1a8f4?auto=format&fit=crop&w=1200&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1499696010180-025ef6e1a8f4?auto=format&fit=crop&w=400&q=60',
-    width: 1200,
-    height: 900,
-    title: 'Reunion beach day'
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=1200&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=400&q=60',
-    width: 1200,
-    height: 900,
-    title: 'Grandparents wedding'
-  }
-]
+// gallery removed; replaced by PostList feed
 
 onMounted(() => {
   if (!members.value.length) {
